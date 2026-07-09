@@ -24,7 +24,7 @@ hydra-genetics-skills/
 ├── module-creation/
 │   └── SKILL.md
 └── rule-development/
-└── SKILL.md
+    └── SKILL.md
 ```
 
 ## Usage
