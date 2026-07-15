@@ -5,6 +5,54 @@ description: Use this skill when the user wants to create a brand-new hydra-gene
 
 # Creating a hydra-genetics Pipeline from Scratch
 
+## Check for existing modules before scaffolding
+
+Before creating any new rule, module, or custom script as part of a pipeline build,
+**check whether an existing hydra-genetics module already provides that functionality.**
+This applies especially at the "create a pipeline from scratch" stage, where there is
+no local repo to grep — the relevant module may live in a completely different
+hydra-genetics repository that isn't in front of you.
+
+### Steps
+
+1. **Identify the tool/functionality being requested.** Extract the concrete keywords
+   from the user's request (tool names, file formats, output types — e.g. "cnvkit",
+   "html report", "bwa", "cram"). Don't just match on the literal words used; also
+   consider synonyms and the underlying purpose (e.g. "coverage report" and "QC
+   summary" may point to the same module).
+
+2. **Check the hydra-genetics GitHub org for a matching module** before writing
+   anything. Use:
+```bash
+   git clone --depth 1 https://github.com/hydra-genetics/hydra-genetics.git
+```
+   and inspect the module list / compatible-modules documentation, or list the org's
+   repos directly (`gh repo list hydra-genetics` or the GitHub API) to check for a
+   repo name or description matching the requested functionality.
+   Do not rely on memory or training data for "which modules exist" — this list
+   changes over time and must be checked against the live org, same as CLI commands
+   and templates elsewhere in this skill set.
+
+3. **If a plausible match is found, stop and confirm with the user** before writing
+   any custom rule or script. Say what you found and ask directly, e.g.:
+   > "hydra-genetics already has a `cnvkit` module that includes an HTML report rule
+   > (`hydra-genetics/cnv_sv`, rule `cnvkit_report`). Do you want to import that
+   > module instead of writing a custom rule for this?"
+   Never silently assume the match is right or wrong — the user knows their pipeline's
+   requirements better than a name/description match does.
+
+4. **If no match is found**, say so explicitly ("I checked the hydra-genetics org and
+   didn't find an existing module for X") before proceeding to scaffold a custom
+   rule. This keeps the check auditable rather than invisible.
+
+5. **If a match is found and confirmed**, follow the module-import steps elsewhere
+   in this skill (or in `module-creation`) rather than duplicating the module's rules.
+
+This check is a stopgap for cross-repo visibility until `hydra-genetics-graph` exists.
+Once the graph's CI/CD pipeline is live and queryable, prefer querying it directly
+over listing/cloning the org by hand — but until then, this manual check is
+mandatory, not optional, at the start of any from-scratch pipeline build.
+
 ## Correction versus older documentation
 
 The hydra-genetics readthedocs page for pipeline creation currently says the CLI command is `hydra-genetics create-module`. **That's stale.** Checking the actual current CLI source (the `develop` branch, matching the latest release), the real command is:

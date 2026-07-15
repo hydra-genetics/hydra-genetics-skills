@@ -5,6 +5,19 @@ description: Use this skill when the user wants to create a brand-new hydra-gene
 
 # Creating a hydra-genetics Module from Scratch
 
+## Check for existing modules before scaffolding
+
+Before scaffolding a new module, confirm one doesn't already exist for the requested
+functionality — see **"Check for existing modules before scaffolding"** in
+`pipeline-creation/SKILL.md` for the full procedure (org search, confirmation step,
+audit trail). Follow it exactly the same way here: identify the tool/functionality
+being requested, check the hydra-genetics org before writing anything, and stop to
+confirm with the user if a plausible match turns up.
+
+This is not optional just because you're scaffolding a module rather than a full
+pipeline — a from-scratch module request has the same cross-repo blind spot as a
+from-scratch pipeline request.
+
 ## Same scaffold as a pipeline
 
 A module is scaffolded with the identical command and template as a pipeline — see the `pipeline-creation` skill for the full command reference, required flags, folder structure, and the mandatory `Snakefile`/`common.smk`/schema shape. Don't duplicate that content here; the scaffold step is the same:
