@@ -213,3 +213,7 @@ rule samtools_sort:
 ```
 
 When reviewing or generating a rule, walk through the checklist above explicitly rather than eyeballing it — missing sections are easy to miss on a quick read.
+
+Do not run the test suite after creating or editing a rule. Checking that a test exists (per the checklist above) means confirming the file is present in `.tests/`, not executing it.
+
+Do not run a Snakemake dry-run (`snakemake -n`) either. Tell the user that you don't have the actual input/output files needed for a dry-run to resolve, so they'll need to run it themselves.
