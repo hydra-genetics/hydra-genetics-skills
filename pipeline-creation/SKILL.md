@@ -197,8 +197,8 @@ except WorkflowError as we:
     if parent_rule_ == "schema:":
         sys.exit(error_msg)
     else:
-        schema_hiearachy = parent_rule_.split()[-1]
-        schema_section = ".".join(re.findall(r"\['([^']+)'\]", schema_hiearachy)[1::2])
+        schema_hierarchy = parent_rule_.split()[-1]
+        schema_section = ".".join(re.findall(r"\['([^']+)'\]", schema_hierarchy)[1::2])
         sys.exit(f"{error_msg} in {schema_section}")
 
 date_string = datetime.now().strftime('%Y%m%d--%H-%M-%S')
@@ -212,7 +212,7 @@ onstart:
     export_pipeline_version_as_file(pipeline_version, date_string=date_string, directory="results/versions/software")
     if use_container(workflow):
         update_config, software_info = add_software_version_to_config(config, workflow, False)
-        export_software_version_as_files(software_info, date_string=date_string, directory="results/versions/software")
+        export_software_version_as_file(software_info, date_string=date_string, directory="results/versions/software")
     export_config_as_file(update_config, date_string=date_string, directory="results/versions")
 
 ### Read and validate resources file
@@ -228,7 +228,7 @@ validate(samples, schema="../schemas/samples.schema.yaml")
 ### Read and validate units file
 
 units = (
-    pandas.read_table(config["units"], dtype=str)
+    pd.read_table(config["units"], dtype=str)
     .set_index(["sample", "type", "flowcell", "lane", "barcode"], drop=False)
     .sort_index()
 )
@@ -262,7 +262,7 @@ def compile_output_file_list(wildcards):
             ]
         )
         for op in outputpaths:
-            output_files.append(outdir / Path(op))
+            output_files.append(outdir / pathlib.Path(op))
     return output_files
 
 
@@ -276,7 +276,7 @@ generate_copy_rules(output_spec)
 ```
 
 Key points to preserve when writing or reviewing this file:
-- **Four validation blocks, in this order**: config → resources → samples → units → output. Each loads its file and immediately validates against its matching schema in `../schemas/`. Don't skip or reorder these.
+- **Five validation blocks, in this order**: config → resources → samples → units → output. Each loads its file and immediately validates against its matching schema in `../schemas/`. Don't skip or reorder these.
 - **`wildcard_constraints`** pins `sample` to the actual sample IDs and `type` to `N|T|R` — this is what makes `{sample}`/`{type}` safe to use unconstrained in every rule (see rule-development).
 - **`compile_output_file_list`** is what `rule all` in the Snakefile targets — it's built from `output_files.yaml`/`output_spec`, not hardcoded.
 - The `generate_copy_rules` function (elided above — it's ~40 lines of `exec`-based rule generation) auto-creates a trivial copy rule for every `output_files.yaml` entry that has a non-null `input`, so results land at the requested path without a dedicated rule. Don't try to hand-write this logic; if asked to explain it, describe the behavior (copies `input` to `output` for entries with a real source file) rather than reproducing the exec/rule-generation internals verbatim.
