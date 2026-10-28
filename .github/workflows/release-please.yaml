@@ -1,0 +1,20 @@
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+name: release-please
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          target-branch: main
+          token: ${{ secrets.GITHUB_TOKEN }}
