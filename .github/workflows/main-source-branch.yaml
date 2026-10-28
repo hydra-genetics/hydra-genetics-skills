@@ -1,0 +1,17 @@
+name: main-source-branch
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-source-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Only develop (or release-please) may target main
+        run: |
+          head="${{ github.head_ref }}"
+          if [[ "$head" != "develop" && "$head" != release-please--* ]]; then
+            echo "PRs into main must come from develop, got: $head"
+            exit 1
+          fi
