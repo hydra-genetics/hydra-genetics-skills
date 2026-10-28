@@ -210,6 +210,8 @@ add_version_files_to_multiqc(config, version_files)
 
 onstart:
     export_pipeline_version_as_file(pipeline_version, date_string=date_string, directory="results/versions/software")
+    # Without containers there is no software info to add, export the config as is
+    update_config = config
     if use_container(workflow):
         update_config, software_info = add_software_version_to_config(config, workflow, False)
         export_software_version_as_file(software_info, date_string=date_string, directory="results/versions/software")
