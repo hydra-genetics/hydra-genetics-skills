@@ -1,6 +1,6 @@
 ---
 name: rule-development
-description: Use for writing, reviewing, or scaffolding a Snakemake rule (.smk file) for a hydra-genetics module, or for the schema files (rules/config/resources.schema.yaml), softwares.md, or DAG files (docs/images/*.dot,*.svg) that accompany a rule. Trigger on "make/add a rule", "write a .smk file", scaffold a pipeline step, `hydra-genetics create-rule`, updating rule/config/resources schemas or the DAG, or reviewing a rule for hydra-genetics compliance — even without "hydra-genetics" named explicitly. Rules must always follow the full skeleton (input, output, params, log, benchmark, threads, resources, container, conda, message, one of wrapper/script/shell/run) — flag any missing section. Every new rule also needs matching entries in the three schema files, a softwares.md stub, and an updated DAG — treat a rule missing these as incomplete too.
+description: Use for writing, reviewing, or scaffolding a Snakemake rule (.smk file) for a hydra-genetics module, or for the schema files (rules/config/resources.schema.yaml), softwares.md, or DAG files (docs/images/*.dot,*.svg) that accompany a rule. Trigger on "make/add a rule", "write a .smk file", scaffold a pipeline step, `hydra-genetics create-rule`, updating rule/config/resources schemas or the DAG, or reviewing a rule for hydra-genetics compliance — even without "hydra-genetics" named explicitly. Rules must always follow the full skeleton (input, output, params, log, benchmark, threads, resources, container, message, one of wrapper/script/shell/run) — flag any missing section. Every new rule also needs matching entries in the three schema files, a softwares.md stub, and an updated DAG — treat a rule missing these as incomplete too.
 ---
 
 # Writing hydra-genetics Rules (.smk)
@@ -37,8 +37,6 @@ rule example_rule:
         time=config.get("example_rule", {}).get("time", config["default_resources"]["time"]),
     container:
         config.get("example_rule", {}).get("container", config["default_container"])
-    conda:
-        "../envs/example_tool.yaml"
     message:
         "{rule}: Do stuff on {input.in_}"
     wrapper:
@@ -71,8 +69,6 @@ rule example_rule:
 **`resources`** — Five keys are standard: `mem_mb`, `mem_per_cpu`, `partition`, `threads`, `time`. Each follows the same two-level fallback: rule-specific config, then `config["default_resources"]`. Don't drop any of the five even if a rule seems simple — schedulers on HPC clusters expect all of them to be present.
 
 **`container`** — Falls back to `config["default_container"]` if the rule doesn't specify its own. Only override this when the rule needs a tool not present in the default container.
-
-**`conda`** — Points to a `.yaml` env file, conventionally at `../envs/<tool_name>.yaml` relative to the rule file. One env file per tool, named for the tool, not the rule.
 
 **`message`** — A short, human-readable status line, conventionally `"{rule}: <what it does> on {input.<key>}"`. This is what streams to the console during a run, so keep it terse.
 
@@ -161,12 +157,11 @@ The `#...#` tags are placeholders resolved at doc-build time by pulling live fro
 
 Several items below can't be confirmed from the generated text alone — they require looking at the actual files in the repo. Don't check them off by assumption; open the real file and verify.
 
-- [ ] All 11 sections present (input, output, params, log, benchmark, threads, resources, container, conda, message, and one of wrapper/script/shell/run)
+- [ ] All 11 sections present (input, output, params, log, benchmark, threads, resources, container, message, and one of wrapper/script/shell/run)
 - [ ] Every tunable value uses the `config.get("<rule_name>", {}).get(...)` fallback pattern — nothing hardcoded
 - [ ] `resources` includes all five standard keys, each with a `default_resources` fallback
 - [ ] `benchmark` uses `repeat(...)` with a configurable repeat count
 - [ ] Exactly one of `wrapper` / `script` / `shell` / `run` is set — wrapper path/version confirmed with the user, not guessed; `shell` used if no wrapper is known
-- [ ] `conda` env file follows the `../envs/<tool_name>.yaml` convention
 - [ ] Wildcards used are the standard `{sample}`, `{type}` unless there's a documented reason for a new one
 - [ ] **(verify against the actual `.tests/` directory)** Rule has at least one corresponding test — check what's actually there, don't assume it exists because the rule does
 - [ ] `rules.schema.yaml` has an entry for this rule, with `input1`/`output1` placeholders renamed to the real input/output keys and real descriptions written
@@ -204,8 +199,6 @@ rule samtools_sort:
         time=config.get("samtools_sort", {}).get("time", config["default_resources"]["time"]),
     container:
         config.get("samtools_sort", {}).get("container", config["default_container"])
-    conda:
-        "../envs/samtools.yaml"
     message:
         "{rule}: Sort {input.bam}"
     wrapper:
