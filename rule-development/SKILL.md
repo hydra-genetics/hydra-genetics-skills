@@ -157,7 +157,7 @@ The `#...#` tags are placeholders resolved at doc-build time by pulling live fro
 
 Several items below can't be confirmed from the generated text alone — they require looking at the actual files in the repo. Don't check them off by assumption; open the real file and verify.
 
-- [ ] All 11 sections present (input, output, params, log, benchmark, threads, resources, container, message, and one of wrapper/script/shell/run)
+- [ ] All 10 sections present (input, output, params, log, benchmark, threads, resources, container, message, and one of wrapper/script/shell/run)
 - [ ] Every tunable value uses the `config.get("<rule_name>", {}).get(...)` fallback pattern — nothing hardcoded
 - [ ] `resources` includes all five standard keys, each with a `default_resources` fallback
 - [ ] `benchmark` uses `repeat(...)` with a configurable repeat count
