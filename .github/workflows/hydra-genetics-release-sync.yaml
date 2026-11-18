@@ -31,7 +31,9 @@ jobs:
         id: version
         run: |
           current="$(cat HYDRA_GENETICS_VERSION)"
-          latest="$(gh release view -R hydra-genetics/hydra-genetics --json tagName -q .tagName)"
+          # Use PyPI, not GitHub releases: the snapshot installs from PyPI, and a
+          # GitHub release can exist before its package has been uploaded.
+          latest="v$(curl -fsSL https://pypi.org/pypi/hydra-genetics/json | python3 -c 'import json, sys; print(json.load(sys.stdin)["info"]["version"])')"
           branch="sync/hydra-genetics-${latest}"
           echo "current=$current" >> "$GITHUB_OUTPUT"
           echo "latest=$latest" >> "$GITHUB_OUTPUT"
