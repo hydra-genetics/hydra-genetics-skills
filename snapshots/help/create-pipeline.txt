@@ -1,0 +1,20 @@
+Usage: hydra-genetics create-pipeline [OPTIONS]
+
+Options:
+  -n, --name TEXT               The name of your new pipeline  [required]
+  -d, --description TEXT        A short description of your pipeline
+                                [required]
+  -a, --author TEXT             Name of the main author(s)  [required]
+  -e, --email TEXT              E-mail(s) of the main author(s)  [required]
+  --version TEXT                The initial version number to use  [default:
+                                0.0.1]
+  --min-snakemake-version TEXT  Min snakemake version, the pipeline will
+                                require snakemake >= this version and < the
+                                next major version  [default: 7.8.0]
+  -g, --git-user TEXT           User name of main git user(s)  [required]
+  --no-git                      Do not create git repo
+  -f, --force                   Overwrite output directory if it already
+                                exists
+  -o, --outdir TEXT             Output directory for new pipeline (default:
+                                pipeline name)
+  --help                        Show this message and exit.

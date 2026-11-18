@@ -1,0 +1,68 @@
+Usage: hydra-genetics create-input-files [OPTIONS]
+
+  Create samples.tsv and units.tsv for the selected sequencing platform.
+
+  min_file_size optionally excludes samples whose total input file size in
+  bytes (summed fastq.gz for short reads, summed BAM for PACBIO/ONT) is below
+  the threshold, and enables the excluded_samples_mqc.tsv MultiQC report.
+  Supported for all platforms.
+
+Options:
+  -d, --directory TEXT          path to dir where fastq-files should be looked
+                                for when platform is Illumina. Path to
+                                unmapped BAM files when platform is ONT or
+                                PACBIO  [required]
+  -o, --outdir TEXT             Output directory for the generated files
+                                (default: current dir)
+  -p, --platform TEXT           Sequence platform that the data originate
+                                from, e.g., nextseq, miseq, Illumina. For long
+                                read it needs to be PACBIO or ONT.  [required]
+  -t, --sample-type TEXT        Sample type, N|T|R, default T  [default: T]
+  -s, --sample-regex TEXT       Regex used to find fastq files and to extract
+                                sample from filename, default
+                                '([A-Za-z0-9-]+)_.+\.fastq.gz'  [default:
+                                ([A-Za-z0-9-]+)_.+\.fastq.gz]
+  -n, --read-number-regex TEXT  Regex used to extract read number from
+                                filename (note only number value), default
+                                '_R([12]{1})_'  [default: _R([12]{1})_]
+  -a, --adapters TEXT           adapter sequence, comma separated, default:
+                                the Illumina TruSeq adapters for Illumina,
+                                none for PACBIO/ONT  [default: (dynamic)]
+  --post-file-modifier TEXT     add string to output files
+  -f, --force                   overwrite existing files
+  -b, --default-barcode TEXT    default barcode value that should be used when
+                                the fastq files are missing barcode
+                                information in their header, if not set the
+                                tool will fail if barcode can not be extracted
+  --tc FLOAT                    tumor content
+  --data-json TEXT              json file with data that should be added to
+                                samples/units tsv files
+  --data-columns TEXT           json file specifying which data should be
+                                added as columns to samples/units tsv files
+  --validate                    see if fastq contain multiple runs/lanes by
+                                comparing first and last read. Note: this will
+                                take time since the whole file needs to be
+                                parsed.
+  --ask                         ask for user input when inconsistent machine
+                                id or flow cell id are found, only asked when
+                                --validate is set.
+  --th FLOAT                    if the occurrence of a consensus base in the
+                                barcode is below this value a warning will be
+                                printed  [default: 0.9]
+  --nreads INTEGER              number of reads that will be used to generate
+                                consensus barcode.  [default: 200]
+  --every INTEGER               select every N reads for validation.
+                                [default: 1000]
+  --min-file-size INTEGER       minimum total input file size on disk, in
+                                bytes, summed per sample (compressed fastq.gz
+                                files for Illumina, BAM files for PACBIO/ONT)
+                                for a sample to be included in
+                                samples.tsv/units.tsv. Samples below this are
+                                left out and instead listed, with their
+                                observed size, in excluded_samples_mqc.tsv (a
+                                MultiQC custom-content file; always written,
+                                header-only if nothing was excluded) so they
+                                are visibly flagged rather than silently
+                                missing. Default: disabled, matches previous
+                                behaviour.
+  --help                        Show this message and exit.

@@ -1,0 +1,96 @@
+name: hydra-genetics release sync
+
+# Weekly check for a new hydra-genetics release. If one exists, regenerate
+# snapshots/ (CLI --help output + templates) and open a PR whose diff shows
+# exactly what changed upstream, so the SKILL.md files can be updated to match.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compare pinned version with latest release
+        id: version
+        run: |
+          current="$(cat HYDRA_GENETICS_VERSION)"
+          latest="$(gh release view -R hydra-genetics/hydra-genetics --json tagName -q .tagName)"
+          branch="sync/hydra-genetics-${latest}"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          if [ "$current" = "$latest" ]; then
+            echo "Skills already synced with $latest"
+            echo "update=false" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            echo "Sync branch $branch already exists, not opening a duplicate PR"
+            echo "update=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "update=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Regenerate snapshots
+        if: steps.version.outputs.update == 'true'
+        run: scripts/snapshot-hydra-genetics.sh "${{ steps.version.outputs.latest }}"
+
+      - name: Open sync PR
+        if: steps.version.outputs.update == 'true'
+        env:
+          CURRENT: ${{ steps.version.outputs.current }}
+          LATEST: ${{ steps.version.outputs.latest }}
+          BRANCH: ${{ steps.version.outputs.branch }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+
+          echo "$LATEST" > HYDRA_GENETICS_VERSION
+          git add -A snapshots HYDRA_GENETICS_VERSION
+
+          if git diff --cached --quiet -- snapshots; then
+            summary="No CLI help or template changes between \`$CURRENT\` and \`$LATEST\`. The skills only need their version references bumped."
+            diff_section=""
+          else
+            summary="CLI help and/or templates changed between \`$CURRENT\` and \`$LATEST\`. Review the diff below and update the affected SKILL.md files **in this PR** before merging."
+            diff="$(git diff --cached -- snapshots | head -c 50000)"
+            diff_section="$(printf '<details><summary>Snapshot diff (truncated at 50 kB)</summary>\n\n```diff\n%s\n```\n</details>\n' "$diff")"
+            echo
+            echo "Changed snapshot files:"
+            git diff --cached --stat -- snapshots
+          fi
+
+          git commit -q -m "chore: sync snapshots with hydra-genetics $LATEST"
+          git push -u origin "$BRANCH"
+
+          body="$(cat <<EOF
+          Automated check: hydra-genetics [\`$LATEST\`](https://github.com/hydra-genetics/hydra-genetics/releases/tag/$LATEST) is out (skills currently verified against \`$CURRENT\`).
+
+          $summary
+
+          **Before merging**
+          - [ ] Update any SKILL.md text affected by the snapshot diff (flag tables, defaults, template excerpts, folder tree)
+          - [ ] Bump the "Verified against hydra-genetics \`vX.Y.Z\`" lines in the SKILL.md files to \`$LATEST\`
+
+          $diff_section
+          EOF
+          )"
+          gh pr create --base develop --head "$BRANCH" \
+            --title "chore: sync skills with hydra-genetics $LATEST" \
+            --body "$body"

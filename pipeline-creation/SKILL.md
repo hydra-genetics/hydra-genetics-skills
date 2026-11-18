@@ -84,6 +84,8 @@ hydra-genetics create-pipeline -n <name> -d "<description>" -a "<author>" -e <em
 
 (Verified against hydra-genetics `v4.3.0`, `hydra_genetics/__main__.py`.) The required flags are interactive prompts if omitted — pass them explicitly so the command doesn't hang waiting for input.
 
+**The installed CLI wins over this table.** If `hydra-genetics` is installed, run `hydra-genetics --version` and `hydra-genetics create-pipeline --help` before scaffolding. If its flags or defaults differ from the table above, follow the CLI output and tell the user the skill is out of date.
+
 Never invent values for the five required flags (name, description, author, email, git-user) — ask the user, the same way rule-development asks about wrapper choice rather than guessing.
 
 ## After scaffolding: push to git

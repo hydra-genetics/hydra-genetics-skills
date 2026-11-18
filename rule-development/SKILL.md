@@ -74,6 +74,8 @@ hydra-genetics create-rule -c <command> [-t <tool>] -m <module_name> -a "<author
 
 Required flags prompt interactively if omitted — pass them explicitly. Never invent author/email; ask the user.
 
+**The installed CLI wins over this table.** If `hydra-genetics` is installed, run `hydra-genetics --version` and `hydra-genetics create-rule --help` before using it. If its flags or behavior differ from what's described here, follow the CLI output and tell the user the skill is out of date.
+
 **Naming and file placement:**
 - **With `-t`:** the rule is named `<tool>_<command>` and goes in `workflow/rules/<tool>.smk`. If that file exists the rule is appended, with no new header. Otherwise the file is created with the header.
 - **Without `-t`:** the rule is named `<command>` and goes in a new `workflow/rules/<command>.smk`. The CLI refuses if that file already exists.
