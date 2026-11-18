@@ -54,6 +54,33 @@ rule example_rule:
 > ```
 > If you're **adding another rule to an existing `.smk` file** (e.g. a second samtools rule in `samtools.smk`), don't repeat this header — only the first rule in each file carries it. If you're unsure whether the target `.smk` file already exists, check before deciding whether to include the header.
 
+## The `create-rule` CLI
+
+(Verified against hydra-genetics `v4.3.0`.)
+
+```bash
+hydra-genetics create-rule -c <command> [-t <tool>] -m <module_name> -a "<author>" -e <email> [-o <outdir>] [--script]
+```
+
+| Flag | Meaning | Required? |
+|---|---|---|
+| `-c, --command` | Command the rule runs; used to name the rule. Must match `^[a-z0-9_]+$` | Yes |
+| `-t, --tool` | Tool used to run the command (e.g. `samtools`). Must match `^[a-z0-9_]+$` | No |
+| `-m, --module` | Module/pipeline the rule is added to (expects `<module>/workflow/rules/` to exist). Must match `^[a-z][a-z0-9_]+$` | Yes |
+| `-a, --author` | Main author name(s) | Yes |
+| `-e, --email` | Author email(s) | Yes |
+| `-o, --outdir` | Directory containing the module folder (default: current dir) | No |
+| `--script` | Create a rule that runs a Python script instead of a wrapper (see below) | No |
+
+Required flags prompt interactively if omitted — pass them explicitly. Never invent author/email; ask the user.
+
+**Naming and file placement:**
+- **With `-t`:** the rule is named `<tool>_<command>` and goes in `workflow/rules/<tool>.smk`. If that file exists the rule is appended, with no new header. Otherwise the file is created with the header.
+- **Without `-t`:** the rule is named `<command>` and goes in a new `workflow/rules/<command>.smk`. The CLI refuses if that file already exists.
+- The CLI also refuses if a `rule`/`checkpoint` with the same name already exists in any `.smk` file in the module.
+
+**`--script`:** the generated rule uses `script: "../scripts/<command>.py"` instead of `wrapper:`. The CLI also creates stub `workflow/scripts/<command>.py` and `workflow/scripts/test_<command>.py`. With `--script`, the rule is named just `<command>`, and `-t` only selects the `.smk` file. `<command>` must be a valid Python identifier. It can't start with `test_`, can't be `input_file`, `output_file` or `tmp_path`, and can't shadow an existing Python module. Treat the generated script and test as stubs to fill in, not finished logic.
+
 ## Section-by-section guide
 
 **`input` / `output`** — Follow the `module/rule_name/{sample}_{type}.suffix` path convention. `{sample}` and `{type}` are the standard wildcards used throughout hydra-genetics; don't invent new wildcard names for concepts these already cover. Wrap intermediate files that shouldn't persist in `output` with `temp(...)`.
@@ -103,7 +130,7 @@ Every new rule needs matching entries in three schema files plus a docs stub —
             description: description output1
 ```
 
-The generated `input1`/`output1` keys are placeholders — **always rename them to match the actual keys used in the rule's `input:`/`output:` block** (e.g. `bam`, `vcf`) and write a real one-line description for each. Leaving `input1`/`output1` in place is a sign the schema wasn't finished.
+The generated `input1`/`output1` keys are placeholders — **always rename them to match the actual keys used in the rule's `input:`/`output:` block** (e.g. `bam`, `vcf`) and write a real one-line description for each. Leaving `input1`/`output1` in place is a sign the schema wasn't finished. The generated template also includes a commented `#value: set to override value in table, else remove` line under each key. Either set `value:` to override what the docs table shows, or delete the comment.
 
 **2. `workflow/schemas/config.schema.yaml`** — one entry per rule with the three standard overridable params:
 
@@ -149,7 +176,7 @@ Introduction to <name>
 
 The `#...#` tags are placeholders resolved at doc-build time by pulling live from the rule source and the schema files above — meaning the descriptions you write into the schemas are what actually shows up in the rendered docs. Fill in `url_to_tool` and the tool introduction by hand; the tags themselves shouldn't be edited.
 
-**Ordering:** all three schema files are appended to, not inserted alphabetically. Every generated entry carries the comment `# Entry added using Hydra-Genetics CLI - please move it into alphabetically sorted order` — treat that as a literal to-do, not decoration. Move the new entry into alphabetical position among existing rule entries before considering the schema update done. This requires opening the actual schema file and looking at what's already there — a generated entry can't be judged "correctly ordered" in isolation.
+**Ordering:** the CLI doesn't insert new entries alphabetically. In each existing schema file it inserts the entry just before the top-level `required:` line, or at the end if there is none. Every generated entry carries the comment `# Entry added using hydra-genetics CLI - please move it into alphabetically sorted order` — treat that as a literal to-do, not decoration. Move the new entry into alphabetical position among existing rule entries before considering the schema update done. This requires opening the actual schema file and looking at what's already there — a generated entry can't be judged "correctly ordered" in isolation.
 
 **5. `docs/images/*.dot` and `docs/images/*.svg`** — the rule graph (DAG) files. A new rule adds a node to the pipeline's DAG, so the `.dot` source and its rendered `.svg` (e.g. `images/rulegraph.svg`) need to be regenerated to include it — typically via `snakemake --rulegraph | dot -Tsvg > images/rulegraph.svg` (or the module's equivalent target). Don't forget these just because they're diagrams rather than code: a rule that's wired into `common.smk`/`Snakefile` but missing from the DAG is a stale-docs bug, and it's easy to miss since nothing fails at runtime if it's skipped.
 
