@@ -61,7 +61,7 @@ The hydra-genetics readthedocs page for pipeline creation currently says the CLI
 hydra-genetics create-pipeline
 ```
 
-This one command scaffolds both pipelines and modules (its `short_help` literally says "create bare bone project, pipeline or module") — same template, same folder structure, regardless of which you're building. Use `create-pipeline`, not `create-module`.
+This one command scaffolds both pipelines and modules (its `short_help` literally says "create bare-bones project, pipeline or module") — same template, same folder structure, regardless of which you're building. Use `create-pipeline`, not `create-module`.
 
 ## Required flags — ask, don't guess
 
@@ -71,18 +71,20 @@ hydra-genetics create-pipeline -n <name> -d "<description>" -a "<author>" -e <em
 
 | Flag | Meaning | Required? |
 |---|---|---|
-| `-n, --name` | Pipeline name | Yes |
+| `-n, --name` | Pipeline name — must match `^[a-z][a-z0-9_]+$` (lowercase, starts with a letter, only letters/digits/`_`); invalid names trigger a re-prompt | Yes |
 | `-d, --description` | Short description | Yes |
 | `-a, --author` | Main author name(s) | Yes |
 | `-e, --email` | Author email(s) | Yes |
 | `-g, --git-user` | Git username | Yes |
 | `--version` | Initial version (default `0.0.1`) | No |
-| `--min-snakemake-version` | Min snakemake version (default `6.8.0`) | No |
+| `--min-snakemake-version` | Min snakemake version (default `7.8.0`). Must be 1–3 dot-separated numbers (e.g. `7`, `7.8`, `7.8.0`); the pipeline then requires snakemake `>=` this version and `<` the next major version | No |
 | `--no-git` | Skip local git repo init | No |
 | `-f, --force` | Overwrite existing output dir | No |
 | `-o, --outdir` | Output directory (default: pipeline name) | No |
 
-Never invent values for the four required flags (name, description, author, email, git-user) — ask the user, the same way rule-development asks about wrapper choice rather than guessing.
+(Verified against hydra-genetics `v4.3.0`, `hydra_genetics/__main__.py`.) The required flags are interactive prompts if omitted — pass them explicitly so the command doesn't hang waiting for input.
+
+Never invent values for the five required flags (name, description, author, email, git-user) — ask the user, the same way rule-development asks about wrapper choice rather than guessing.
 
 ## After scaffolding: push to git
 

@@ -26,7 +26,7 @@ A module is scaffolded with the identical command and template as a pipeline —
 hydra-genetics create-pipeline -n <name> -d "<description>" -a "<author>" -e <email> -g <git_user> [OPTIONS]
 ```
 
-(Yes, the command is literally `create-pipeline` even when building a module — the CLI's own `short_help` describes it as creating a "bare bone project, pipeline or module". Don't guess a different command name.)
+(Yes, the command is literally `create-pipeline` even when building a module — the CLI's own `short_help` describes it as creating a "bare-bones project, pipeline or module". Don't guess a different command name.)
 
 Never invent the required flag values (name, description, author, email, git-user) — ask the user.
 
@@ -57,8 +57,10 @@ use rule * from <module_name> as <module_name>_*
 **3. Immediately after scaffolding, hand off to `rule-development` for each rule the user wants.** This skill doesn't duplicate rule-writing logic — once the bare module exists, adding rules (and their `rules.schema.yaml`/`config.schema.yaml`/`resources.schema.yaml`/`softwares.md`/DAG entries) is exactly the `rule-development` skill's job, called once per rule:
 
 ```bash
-hydra-genetics create-rule -c <command> -t <tool> -m <module_name> -a <author> -e <email>
+hydra-genetics create-rule -c <command> [-t <tool>] -m <module_name> -a <author> -e <email> [-o <outdir>] [--script]
 ```
+
+(See `rule-development` for what each `create-rule` flag does, including `--script`.)
 
 If the user asked for "a module with rules for samtools sort and samtools stats," that's: one `create-pipeline` scaffold call, then two passes through `rule-development` (one per rule) — don't try to write the rules directly in this skill.
 
