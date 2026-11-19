@@ -70,6 +70,17 @@ cd hydra-genetics-skills && git pull
 cp -r pipeline-creation module-creation rule-development ~/.claude/skills/   # re-copy to refresh
 ```
 
+## Syncing with hydra-genetics releases
+
+The skills restate parts of the hydra-genetics CLI (flags, defaults, templates), so they can go out of date when a new hydra-genetics version is released.
+
+- `HYDRA_GENETICS_VERSION` holds the release the skills were last checked against.
+- `snapshots/` holds that release's `--help` output and the parts of the pipeline and rule templates that the skills describe. Generate it with `scripts/snapshot-hydra-genetics.sh <tag>`; don't edit it by hand.
+- `.github/workflows/hydra-genetics-release-sync.yaml` runs every Monday, and can also be started manually. If a newer release exists, it regenerates `snapshots/` and opens a `sync/hydra-genetics-<tag>` PR. The PR diff shows what changed upstream.
+- Before merging a sync PR, update the affected SKILL.md text and bump the "Verified against hydra-genetics `vX.Y.Z`" lines.
+
+To check by hand: `scripts/snapshot-hydra-genetics.sh <tag> && git diff snapshots/`.
+
 ## Roadmap
 
 - `core/` — shared scaffolding knowledge, once a third skill needs what

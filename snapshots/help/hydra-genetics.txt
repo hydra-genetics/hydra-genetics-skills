@@ -1,0 +1,17 @@
+Usage: hydra-genetics [OPTIONS] COMMAND [ARGS]...
+
+  CLI tool to prepare and initialize snakemake projects
+
+Options:
+  -V, --version              Show the version and exit.
+  --verbose                  Print verbose output to the console.
+  -l, --log-file <filename>  Save a verbose log to a file.
+  --debug / --no-debug
+  --help                     Show this message and exit.
+
+Commands:
+  create-input-files   create input-files, samples.tsv and units.tsv
+  create-pipeline      create bare-bones project, pipeline or module
+  create-rule          add rule to project
+  prepare-environment  prepare for singularity environment
+  references           set up/validate reference files

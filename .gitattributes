@@ -1,0 +1,2 @@
+# Store upstream snapshots byte-for-byte so CI regeneration diffs cleanly
+snapshots/** -text
